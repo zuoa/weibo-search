@@ -20,7 +20,7 @@ settings = get_project_settings()
 
 class CsvPipeline(object):
     def process_item(self, item, spider):
-        base_dir = '结果文件' + os.sep + item['keyword']
+        base_dir = 'results' + os.sep + item['keyword']
         if not os.path.isdir(base_dir):
             os.makedirs(base_dir)
         file_path = base_dir + os.sep + item['keyword'] + '.csv'
@@ -71,7 +71,7 @@ class SQLitePipeline(object):
         try:
             import sqlite3
             # 在结果文件目录下创建SQLite数据库
-            base_dir = '结果文件'
+            base_dir = 'results'
             if not os.path.isdir(base_dir):
                 os.makedirs(base_dir)
             db_name = settings.get('SQLITE_DATABASE', 'weibo.db')
