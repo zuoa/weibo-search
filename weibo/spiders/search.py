@@ -7,10 +7,10 @@ from urllib.parse import unquote
 
 import requests
 import scrapy
-
-import weibo.utils.util as util
 from scrapy.exceptions import CloseSpider
 from scrapy.utils.project import get_project_settings
+
+import weibo.utils.util as util
 from weibo.items import WeiboItem
 
 
@@ -67,8 +67,9 @@ class SearchSpider(scrapy.Spider):
                 url = base_url + self.weibo_type
                 url += self.contain_type
                 url += '&timescope=custom:{}:{}'.format(start_str, end_str)
+                print(url)
                 yield scrapy.Request(url=url,
-                                     callback=self.parse,
+                                     callback=self.parse_,
                                      meta={
                                          'base_url': base_url,
                                          'keyword': keyword
@@ -83,7 +84,7 @@ class SearchSpider(scrapy.Spider):
                     url += '&timescope=custom:{}:{}'.format(start_str, end_str)
                     # 获取一个省的搜索结果
                     yield scrapy.Request(url=url,
-                                         callback=self.parse,
+                                         callback=self.parse_,
                                          meta={
                                              'base_url': base_url,
                                              'keyword': keyword,
@@ -109,13 +110,14 @@ class SearchSpider(scrapy.Spider):
                 '系统中可能没有安装或正确配置SQLite3数据库，请先根据系统环境安装或配置SQLite3，尝试 pip install sqlite，再运行程序')
             raise CloseSpider()
 
-    def parse(self, response):
+    def parse_(self, response):
         base_url = response.meta.get('base_url')
         keyword = response.meta.get('keyword')
         province = response.meta.get('province')
         is_empty = response.xpath(
             '//div[@class="card card-no-result s-pt20b40"]')
         page_count = len(response.xpath('//ul[@class="s-scroll"]/li'))
+        print("当前页面搜索结果数量：", page_count)
         if is_empty:
             print('当前页面搜索结果为空')
         elif page_count < self.further_threshold:
@@ -332,6 +334,19 @@ class SearchSpider(scrapy.Spider):
             ip_str = ip_str.split()[-1]
         return ip_str
 
+    def get_profile(self, user_id):
+        url = f"https://weibo.com/ajax/profile/info?custom={user_id}"
+        response = requests.get(url, headers=self.settings.get('DEFAULT_REQUEST_HEADERS'))
+        if response.status_code != 200:
+            return {}
+        try:
+            data = response.json()
+        except requests.exceptions.JSONDecodeError:
+            return {}
+        user_profile = data.get("data", {}).get("user", {})
+
+        return user_profile
+
     def get_article_url(self, selector):
         """获取微博头条文章url"""
         article_url = ''
@@ -437,6 +452,8 @@ class SearchSpider(scrapy.Spider):
                 weibo['user_id'] = info[0].xpath(
                     'div[2]/a/@href').extract_first().split('?')[0].split(
                     '/')[-1]
+
+                user_profile = self.get_profile(weibo['user_id'])
                 weibo['screen_name'] = info[0].xpath(
                     'div[2]/a/@nick-name').extract_first()
                 # 获取VIP信息
@@ -472,7 +489,7 @@ class SearchSpider(scrapy.Spider):
                 weibo['text'] = txt_sel.xpath(
                     'string(.)').extract_first().replace('\u200b', '').replace(
                     '\ue627', '')
-                weibo['article_url'] = self.get_article_url(txt_sel)
+                weibo['article_url'] = f'https://weibo.com/{weibo['user_id']}/{weibo['bid']}'
                 weibo['location'] = self.get_location(txt_sel)
                 if weibo['location']:
                     weibo['text'] = weibo['text'].replace(
@@ -559,8 +576,7 @@ class SearchSpider(scrapy.Spider):
                         'string(.)').extract_first().replace('\u200b',
                                                              '').replace(
                         '\ue627', '')
-                    retweet['article_url'] = self.get_article_url(
-                        retweet_txt_sel)
+                    retweet['article_url'] = f'https://weibo.com/{weibo['user_id']}/{weibo['bid']}'
                     retweet['location'] = self.get_location(retweet_txt_sel)
                     if retweet['location']:
                         retweet['text'] = retweet['text'].replace(
@@ -602,7 +618,7 @@ class SearchSpider(scrapy.Spider):
                     # 增加结果计数（转发微博也计入总数）
                     self.result_count += 1
 
-                    yield {'weibo': retweet, 'keyword': keyword}
+                    yield {'weibo': retweet, 'keyword': keyword, 'user_profile': user_profile}
 
                     # 检查是否达到爬取结果数量限制
                     if self.check_limit():
@@ -632,7 +648,7 @@ class SearchSpider(scrapy.Spider):
                 # 增加结果计数（主微博）
                 self.result_count += 1
 
-                yield {'weibo': weibo, 'keyword': keyword}
+                yield {'weibo': weibo, 'keyword': keyword, 'user_profile': user_profile}
 
                 # 检查是否达到爬取结果数量限制
                 if self.check_limit():

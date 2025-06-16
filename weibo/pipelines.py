@@ -100,7 +100,13 @@ class SQLitePipeline(object):
                 ip varchar(100),
                 user_authentication varchar(100),
                 vip_type varchar(50),
-                vip_level INTEGER
+                vip_level INTEGER,
+                keyword varchar(100),
+                followers_count INTEGER DEFAULT 0,
+                friends_count INTEGER DEFAULT 0,
+                total_like_count INTEGER DEFAULT 0,
+                total_repost_count INTEGER DEFAULT 0,
+                total_comment_count INTEGER DEFAULT 0
             )"""
             self.cursor.execute(sql)
             self.conn.commit()
@@ -111,6 +117,12 @@ class SQLitePipeline(object):
 
     def process_item(self, item, spider):
         data = dict(item['weibo'])
+        data['keyword'] = item['keyword']
+        data['followers_count'] = item.get('user_profile', {}).get('followers_count', 0)
+        data['friends_count'] = item.get('user_profile', {}).get('friends_count', 0)
+        data['total_like_count'] = item.get('user_profile', {}).get('status_total_counter', {}).get('like_cnt', '0').replace(",", "")
+        data['total_repost_count'] = item.get('user_profile', {}).get('status_total_counter', {}).get('repost_cnt', '0').replace(",", "")
+        data['total_comment_count'] = item.get('user_profile', {}).get('status_total_counter', {}).get('comment_cnt', '0').replace(",", "")
         data['pics'] = ','.join(data['pics'])
         keys = ', '.join(data.keys())
         placeholders = ', '.join(['?'] * len(data))
