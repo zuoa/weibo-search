@@ -36,6 +36,8 @@ class SearchSpider(scrapy.Spider):
     start_date = settings.get('START_DATE',
                               datetime.now().strftime('%Y-%m-%d'))
     end_date = settings.get('END_DATE', datetime.now().strftime('%Y-%m-%d'))
+
+    print(start_date)
     if util.str_to_time(start_date) > util.str_to_time(end_date):
         sys.exit('settings.py配置错误，START_DATE值应早于或等于END_DATE值，请重新配置settings.py')
     further_threshold = settings.get('FURTHER_THRESHOLD', 46)
@@ -55,6 +57,13 @@ class SearchSpider(scrapy.Spider):
         return False
 
     def start_requests(self):
+
+
+        self.start_date = self.settings.get('START_DATE',
+                                            datetime.now().strftime('%Y-%m-%d'))
+        self.end_date = self.settings.get('END_DATE',
+                                          datetime.now().strftime('%Y-%m-%d'))
+
         start_date = datetime.strptime(self.start_date, '%Y-%m-%d')
         end_date = datetime.strptime(self.end_date,
                                      '%Y-%m-%d') + timedelta(days=1)
@@ -517,7 +526,7 @@ class SearchSpider(scrapy.Spider):
                 weibo['text'] = txt_sel.xpath(
                     'string(.)').extract_first().replace('\u200b', '').replace(
                     '\ue627', '')
-                weibo['article_url'] = f'https://weibo.com/{weibo['user_id']}/{weibo['bid']}'
+                weibo['article_url'] = f'https://weibo.com/{weibo["user_id"]}/{weibo["bid"]}'
                 weibo['location'] = self.get_location(txt_sel)
                 if weibo['location']:
                     weibo['text'] = weibo['text'].replace(
@@ -604,7 +613,7 @@ class SearchSpider(scrapy.Spider):
                         'string(.)').extract_first().replace('\u200b',
                                                              '').replace(
                         '\ue627', '')
-                    retweet['article_url'] = f'https://weibo.com/{weibo['user_id']}/{weibo['bid']}'
+                    retweet['article_url'] = f'https://weibo.com/{weibo["user_id"]}/{weibo["bid"]}'
                     retweet['location'] = self.get_location(retweet_txt_sel)
                     if retweet['location']:
                         retweet['text'] = retweet['text'].replace(

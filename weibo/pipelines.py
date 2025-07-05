@@ -107,7 +107,8 @@ class SQLitePipeline(object):
                 friends_count INTEGER DEFAULT 0,
                 total_like_count INTEGER DEFAULT 0,
                 total_repost_count INTEGER DEFAULT 0,
-                total_comment_count INTEGER DEFAULT 0
+                total_comment_count INTEGER DEFAULT 0,
+                gmt_created DATETIME DEFAULT CURRENT_TIMESTAMP
             )"""
             self.cursor.execute(sql)
             self.conn.commit()

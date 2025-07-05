@@ -12,7 +12,7 @@ DEFAULT_REQUEST_HEADERS = {
     'Accept':
     'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,en-US;q=0.7',
-    'cookie': '',
+    'cookie': 'SINAGLOBAL=5512049616985.004.1731473334480; SCF=Aon72NqlASIWXmOsDoW-PbILlwh8Q0xLq0kNhFSZpAAbGyF69nudafDPsknWoCQDLIBB0SsaKU5h6aXdTkewLbE.; ULV=1749974479873:2:1:1:6366297675248.226.1749974479847:1731473334484; XSRF-TOKEN=q3j6HeMNKaSGMe4aWLEK-zeT; ALF=1754309711; SUB=_2A25FbWcfDeRhGeFJ7FUV-CfMzjuIHXVmA-bXrDV8PUJbkNAbLWXEkW1Nfwjr0gS4FsiNoQxncUW2GOFudAJBodj0; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WhOdRZy_N9Z_n87rYTlfoLP5JpX5KMhUgL.FoMNS0MX1h.7SKM2dJLoI7pgqg4LxPyoIs8V9c-t; WBPSESS=ArGLa9xnuy22PB8ViELrwOZdOq_7YeWdyITd9ceuvaWZERwTbdaDGzJp2sApURENvX8R-VF7iInJCDD3ruIMoaXn6DNn8pWckN0DVUB6kYsfFlz2xN8shrmy0R_GRLF8_luwMMLfY9X79DSjNnj3uw==',
 }
 ITEM_PIPELINES = {
     'weibo.pipelines.DuplicatesPipeline': 300,
@@ -35,9 +35,9 @@ CONTAIN_TYPE = 0
 # 具体支持的地名见region.py文件，注意只支持省或直辖市的名字，省下面的市名及直辖市下面的区县名不支持，不筛选请用“全部”
 REGION = ['全部']
 # 搜索的起始日期，为yyyy-mm-dd形式，搜索结果包含该日期
-START_DATE = '2024-06-01'
-# 搜索的终止日期，为yyyy-mm-dd形式，搜索结果包含该日期
-END_DATE = '2024-09-01'
+# START_DATE = '2024-06-01'
+# # 搜索的终止日期，为yyyy-mm-dd形式，搜索结果包含该日期
+# END_DATE = '2024-09-01'
 # 进一步细分搜索的阈值，若结果页数大于等于该值，则认为结果没有完全展示，细分搜索条件重新搜索以获取更多微博。数值越大速度越快，也越有可能漏掉微博；数值越小速度越慢，获取的微博就越多。
 # 建议数值大小设置在40到50之间。
 FURTHER_THRESHOLD = 46
