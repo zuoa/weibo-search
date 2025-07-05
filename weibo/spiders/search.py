@@ -406,6 +406,34 @@ class SearchSpider(scrapy.Spider):
             topics = ','.join(topic_list)
         return topics
 
+    def get_comments(self, weibo_id, uid, count=10):
+        url = f"https://weibo.com/ajax/statuses/buildComments?is_reload=1&id={weibo_id}&is_show_bulletin=2&is_mix=0&count={count}&uid={uid}&fetch_level=0&locale=zh-CN"
+        response = requests.get(url, headers=self.settings.get('DEFAULT_REQUEST_HEADERS'))
+        if response.status_code != 200:
+            return []
+        try:
+            data = response.json()
+        except requests.exceptions.JSONDecodeError:
+            return []
+        comments = data.get("data", [])
+        if not comments:
+            print(f"未找到微博 {weibo_id} 的评论")
+            return []
+        comments_list = []
+        for comment in comments:
+            comment_item = {
+                'id': comment.get('idstr'),
+                'user_id': comment.get('user', {}).get('idstr', ''),
+                'user_name': comment.get('user', {}).get('screen_name', ''),
+                'text': comment.get('text', '').replace('\u200b', '').replace('\ue627', ''),
+                'created_at': util.standardize_date(comment.get('created_at')),
+                'source': comment.get('source', ''),
+                'like_count': comment.get('like_counts', 0)
+            }
+            comments_list.append(comment_item)
+        return comments_list
+
+
     def get_vip(self, selector):
         """获取用户的VIP类型和等级信息"""
         vip_type = "非会员"

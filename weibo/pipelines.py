@@ -7,6 +7,7 @@
 
 import copy
 import csv
+import datetime
 import os
 
 import scrapy
@@ -124,6 +125,7 @@ class SQLitePipeline(object):
         data['total_repost_count'] = item.get('user_profile', {}).get('status_total_counter', {}).get('repost_cnt', '0').replace(",", "")
         data['total_comment_count'] = item.get('user_profile', {}).get('status_total_counter', {}).get('comment_cnt', '0').replace(",", "")
         data['pics'] = ','.join(data['pics'])
+        data['gmt_created'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         keys = ', '.join(data.keys())
         placeholders = ', '.join(['?'] * len(data))
         sql = f"""INSERT OR REPLACE INTO weibo ({keys}) 
